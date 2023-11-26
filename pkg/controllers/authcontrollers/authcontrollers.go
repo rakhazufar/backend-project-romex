@@ -49,6 +49,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	expTimeToken := time.Now().Add(time.Hour * 24)
 
 	claims := &config.JWTClaim{
+		UserId: int(user.ID),
 		Username: user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer: "go-jwt-postgres",
@@ -111,6 +112,15 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	utils.SendJSONResponse(w, http.StatusOK, message)
 }
 
-func Logout(http.ResponseWriter, *http.Request) {
 
+func Logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name: "token",
+		Path: "/",
+		Value: "",
+		HttpOnly: true,
+		MaxAge: -1,
+	})
+	message := map[string]string{"message": "Logout Success"}
+	utils.SendJSONResponse(w, http.StatusOK, message)
 }
