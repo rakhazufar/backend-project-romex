@@ -15,7 +15,7 @@ func SendJSONResponse(w http.ResponseWriter, status int, payload interface{}) {
     w.Write(response)
 }
 
-func HashPassword (user *models.User, w http.ResponseWriter) {
+func HashPassword(user *models.User, w http.ResponseWriter) {
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -25,4 +25,16 @@ func HashPassword (user *models.User, w http.ResponseWriter) {
 	}
 
 	user.Password = string(hashPass)
+}
+
+func HashAdminPassword(adminpass string) (*string, error) {
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(adminpass), bcrypt.DefaultCost)
+
+	if err != nil {
+		return nil, err
+	}
+
+	hashedAdminPasswword := string(hashPass)
+
+	return &hashedAdminPasswword, nil
 }

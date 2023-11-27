@@ -13,3 +13,10 @@ type JWTClaim struct {
 	Username string
 	jwt.RegisteredClaims
 }
+
+
+type AdminJWTClaim struct {
+	AdminId int
+	Username string
+	jwt.RegisteredClaims
+}
