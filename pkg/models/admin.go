@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/rakhazufar/go-project/pkg/helper"
+	"github.com/rakhazufar/go-project/pkg/utils"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +14,7 @@ type Admin struct {
 	gorm.Model        
 	Username string `gorm:"varchar(300)" json:"username"`
 	Password string `gorm:"varchar(300)" json:"password"`
-	RoleID   uint
+	RoleID   uint   `gorm:"varchar(300)" json:"role_id"`
     Role     Role
 }
 
@@ -24,7 +24,7 @@ func SeedAdmin(db *gorm.DB) {
         log.Fatal("Error loading .env file")
     }
 
-    adminPass, err := helper.HashAdminPassword(os.Getenv("ADMINISTRATOR_PASS"))
+    adminPass, err := utils.HashAdminPassword(os.Getenv("ADMINISTRATOR_PASS"))
     admin := Admin{Username: "administrator", Password: *adminPass, RoleID: 1}
 
 	var tempAdmin Admin

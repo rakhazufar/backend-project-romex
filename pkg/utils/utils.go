@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/rakhazufar/go-project/pkg/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,21 +14,20 @@ func SendJSONResponse(w http.ResponseWriter, status int, payload interface{}) {
     w.Write(response)
 }
 
-func HashPassword(user *models.User, w http.ResponseWriter) {
-	hashPass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+func HashPassword(userpass string) (*string, error) {
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(userpass), bcrypt.DefaultCost)
 
 	if err != nil {
-		message := map[string]string{"message": "Error Creating User"}
-		SendJSONResponse(w, http.StatusInternalServerError, message)
-		return 	
+		return nil, err
 	}
 
-	user.Password = string(hashPass)
+	hashedAdminPasswword := string(hashPass)
+
+	return &hashedAdminPasswword, nil
 }
 
 func HashAdminPassword(adminpass string) (*string, error) {
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(adminpass), bcrypt.DefaultCost)
-
 	if err != nil {
 		return nil, err
 	}

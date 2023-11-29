@@ -18,6 +18,7 @@ func main() {
 	r := mux.NewRouter()
 	routes.Authentication(r)
 	routes.Address(r)
+	routes.Admin(r)
 
 	log.Fatal(http.ListenAndServe(":9010", r))
 }
