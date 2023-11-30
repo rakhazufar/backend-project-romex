@@ -19,6 +19,7 @@ func main() {
 	routes.Authentication(r)
 	routes.Address(r)
 	routes.Admin(r)
+	routes.Products(r)
 
 	log.Fatal(http.ListenAndServe(":9010", r))
 }

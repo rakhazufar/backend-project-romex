@@ -3,7 +3,6 @@ package admincontrollers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -85,7 +84,6 @@ func AdminRegister(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	adminInput.RoleID = uint(adminInput.RoleID)
-	fmt.Println(adminInput)
 	if err := decoder.Decode(&adminInput); err != nil {
 
 		message := map[string]string {"message": "Failed to decode json"}

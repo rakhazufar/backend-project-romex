@@ -9,9 +9,10 @@ import (
 func init() {
 	config.ConnectDatabase()
 	db = config.GetDB()
-	err := db.AutoMigrate(&User{}, &Admin{}, &Address{})
+	err := db.AutoMigrate(&User{}, &Admin{}, &Address{}, &Products{}, &Role{}, &Status{})
 	SeedRoles(db)
 	SeedAdmin(db)
+	SeedStatus(db)
 	
 
 	if err != nil {
