@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/gosimple/slug"
 	"github.com/rakhazufar/go-project/pkg/models"
 	"github.com/rakhazufar/go-project/pkg/utils"
@@ -40,18 +41,40 @@ func CreateProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllProducts(w http.ResponseWriter, r *http.Request) {
+	products, err := models.GetAllProducts(); 
+	if err != nil {
+		message := map[string]string{"message":  "Internal server error"}
+		utils.SendJSONResponse(w, http.StatusInternalServerError, message)
+		return
+	}
 
+	message := products
+	utils.SendJSONResponse(w, http.StatusOK, message)
+	return
 }
 
-func GetProductsByName(w http.ResponseWriter, r *http.Request) {
+func GetProductsBySlug(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	productSlug := vars["slug"]
 
+	product, err := models.GetAllProductsById(productSlug); 
+	if err != nil {
+		message := map[string]string{"message":  err.Error()}
+		utils.SendJSONResponse(w, http.StatusInternalServerError, message)
+		return
+	}
+
+	message := product
+	utils.SendJSONResponse(w, http.StatusOK, message)
+	return
 }
 
 
-func EditProductsById(w http.ResponseWriter, r *http.Request) {
-
+func EditProductsBySlug(w http.ResponseWriter, r *http.Request) {
+	// vars := mux.Vars(r)
+	// productSlug := vars["slug"]
 }
 
-func DeleteProductsById(w http.ResponseWriter, r *http.Request) {
+func DeleteProductsBySlug(w http.ResponseWriter, r *http.Request) {
 
 }
