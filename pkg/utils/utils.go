@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -35,4 +37,12 @@ func HashAdminPassword(adminpass string) (*string, error) {
 	hashedAdminPasswword := string(hashPass)
 
 	return &hashedAdminPasswword, nil
+}
+
+func Slugify(title string) string {
+	u := uuid.New()
+	shortUUID := u.String()[:5]
+	slugTitle := slug.Make(title + "-" + shortUUID)
+	
+	return slugTitle
 }

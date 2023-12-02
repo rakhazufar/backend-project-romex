@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -11,7 +13,9 @@ type Products struct {
 	Description string `json:"description"`
 	Price float64 `json:"price"`
 	StatusID   uint   `gorm:"varchar(300)" json:"status_id"`
-    Status Status 
+	CategoryID   uint   `gorm:"varchar(300)" json:"category_id"`
+    Status Status
+    Categories Categories `gorm:"foreignKey:CategoryID"`
 }
 
 
@@ -25,7 +29,7 @@ func CreateProduct (product *Products) error {
 
 func GetAllProducts() ([]Products, error) {
 	var products []Products
-	result := db.Preload("Status").Find(&products)
+	result := db.Preload("Status").Preload("Categories").Find(&products)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -45,3 +49,23 @@ func GetAllProductsById(slug string) (*Products, error) {
 	return &products, nil
 }
 
+func UpdateProduct (products *Products) (*Products, error){
+	result := db.Save(products)
+	
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return products, nil
+}
+
+
+func DeleteProduct(slug string) error {
+	var product Products
+	result := db.Where("slug=?", slug).Delete(&product)
+	if result.Error != nil {
+		fmt.Println(result.Error)
+		return result.Error
+	}
+	return nil
+}

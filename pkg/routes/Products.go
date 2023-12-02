@@ -12,7 +12,7 @@ func Products (router *mux.Router) {
 	api.HandleFunc("/products", productcontrollers.GetAllProducts).Methods("GET")
 	api.HandleFunc("/products/{slug}", productcontrollers.GetProductsBySlug).Methods("GET")
 	api.HandleFunc("/products/{slug}", productcontrollers.EditProductsBySlug).Methods("PUT")
-	api.HandleFunc("/products/{slug}", productcontrollers.DeleteProductsBySlug).Methods("GET")
+	api.HandleFunc("/products/{slug}", productcontrollers.DeleteProductsBySlug).Methods("DELETE")
 	api.Use(middlewares.AdminJWTMiddleware)
 }
 
