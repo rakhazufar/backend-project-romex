@@ -12,8 +12,8 @@ import (
 func SendJSONResponse(w http.ResponseWriter, status int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 	w.Header().Add("Content-Type", "application/json")
-    w.WriteHeader(status)
-    w.Write(response)
+	w.WriteHeader(status)
+	w.Write(response)
 }
 
 func HashPassword(userpass string) (*string, error) {
@@ -43,6 +43,6 @@ func Slugify(title string) string {
 	u := uuid.New()
 	shortUUID := u.String()[:5]
 	slugTitle := slug.Make(title + "-" + shortUUID)
-	
+
 	return slugTitle
 }

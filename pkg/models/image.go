@@ -6,13 +6,12 @@ import (
 
 type Image struct {
 	gorm.Model
-	ImageURL string `gorm:"varchar(300)" json:"image_url"`
-	ProductID uint `json:"product_id"`
-	Products Products `gorm:"foreignKey:ProductID"`
+	ImageURL  string   `gorm:"varchar(300)" json:"image_url"`
+	ProductID uint     `json:"product_id"`
+	Products  Products `json:"-" gorm:"foreignKey:ProductID"`
 }
 
-
-func ImageUpload (image *Image) error {
+func ImageUpload(image *Image) error {
 	result := db.Create(&image)
 	if result.Error != nil {
 		return result.Error
@@ -20,25 +19,13 @@ func ImageUpload (image *Image) error {
 	return nil
 }
 
+func GetImages(id int) ([]Image, error) {
+	var image []Image
+	result := db.Where("product_id = ?", id).Find(&image)
 
-// func GetRoleByID(id int) (*Role, error) {
-// 	var role Role
-// 	result := db.Where("id = ?", id).First(&role)
+	if result.Error != nil {
+		return nil, result.Error
+	}
 
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
-
-// 	return &role, nil
-// }
-
-// func GetAllRole() ([]Role, error) {
-// 	var roles []Role
-// 	result := db.Find(&roles)
-
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
-
-// 	return roles, nil
-// }
+	return image, nil
+}
