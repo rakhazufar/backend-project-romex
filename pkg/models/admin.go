@@ -24,7 +24,7 @@ func SeedAdmin(db *gorm.DB) {
 		log.Fatal("Error loading .env file")
 	}
 
-	adminPass, err := utils.HashAdminPassword(os.Getenv("ADMINISTRATOR_PASS"))
+	adminPass, _ := utils.HashAdminPassword(os.Getenv("ADMINISTRATOR_PASS"))
 	admin := Admin{Username: "administrator", Password: *adminPass, RoleID: 1}
 
 	var tempAdmin Admin
