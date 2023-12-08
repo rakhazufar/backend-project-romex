@@ -29,3 +29,12 @@ func GetImages(id int) ([]Image, error) {
 
 	return image, nil
 }
+
+func DeleteImage(id int64) error {
+	var image Image
+	result := db.Where("id=?", id).Delete(&image)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

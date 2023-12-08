@@ -2,7 +2,9 @@ package imagecontrollers
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rakhazufar/go-project/pkg/models"
 	"github.com/rakhazufar/go-project/pkg/utils"
+	"gorm.io/gorm"
 )
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
@@ -102,4 +105,30 @@ func GetImagesBySlug(w http.ResponseWriter, r *http.Request) {
 		message := images
 		utils.SendJSONResponse(w, http.StatusOK, message)
 	}
+}
+
+func DeleteImageById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	imageId := vars["id"]
+	id, err := strconv.ParseInt(imageId, 10, 64)
+	if err != nil {
+		log.Printf("Error converting string to int: %v", err)
+		message := map[string]string{"message": "Invalid ID format"}
+		utils.SendJSONResponse(w, http.StatusInternalServerError, message)
+		return
+	}
+
+	if err := models.DeleteImage(id); err != nil {
+		log.Printf("Error deleting image: %v", err)
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.SendJSONResponse(w, http.StatusNotFound, map[string]string{"message": "Image not found"})
+		} else {
+			utils.SendJSONResponse(w, http.StatusInternalServerError, map[string]string{"message": "Internal server error"})
+		}
+		return
+	}
+
+	message := map[string]string{"message": "Success Delete Image"}
+	utils.SendJSONResponse(w, http.StatusOK, message)
 }
