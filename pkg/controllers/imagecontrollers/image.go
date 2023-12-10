@@ -38,14 +38,13 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 
 	files := r.MultipartForm.File["image_url"]
 
-	for x, fileHeader := range files {
+	for _, fileHeader := range files {
 		file, err := fileHeader.Open()
-
-		fmt.Printf(fileHeader.Filename)
 		if err != nil {
 			utils.SendJSONResponse(w, http.StatusInternalServerError, map[string]string{"message": "Error opening file"})
 			continue
 		}
+		defer file.Close()
 
 		if contentTypes, ok := fileHeader.Header["Content-Type"]; ok && len(contentTypes) > 0 {
 			contentType := contentTypes[0]
@@ -58,8 +57,6 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		defer file.Close()
-
 		ctx := context.Background()
 
 		if result, err := cldService.Upload.Upload(ctx, file, uploader.UploadParams{}); err != nil {
@@ -67,22 +64,32 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 			utils.SendJSONResponse(w, http.StatusInternalServerError, message)
 			return
 		} else {
-			fmt.Printf(`Terpanggil %v`, x)
+			fmt.Printf(`Terpanggil %v`, result.OriginalFilename)
 			image := models.Image{
-				ImageURL:  result.SecureURL,
-				ProductID: uint(productID),
+				ImageURL:   result.SecureURL,
+				ProductsID: uint(productID),
 			}
 
 			if err := models.ImageUpload(&image); err != nil {
+				DeleteUploadedImage(ctx, result.PublicID, cldService)
 				message := map[string]string{"message": "failed to save image to database"}
 				utils.SendJSONResponse(w, http.StatusInternalServerError, message)
 				return
 			}
 		}
+
 	}
 
 	message := map[string]string{"message": "success to upload image to database"}
 	utils.SendJSONResponse(w, http.StatusOK, message)
+}
+
+func DeleteUploadedImage(ctx context.Context, publicID string, cldService *cloudinary.Cloudinary) error {
+	_, err := cldService.Upload.Destroy(ctx, uploader.DestroyParams{PublicID: publicID})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetImagesBySlug(w http.ResponseWriter, r *http.Request) {
@@ -96,6 +103,8 @@ func GetImagesBySlug(w http.ResponseWriter, r *http.Request) {
 		utils.SendJSONResponse(w, http.StatusConflict, message)
 		return
 	}
+
+	fmt.Print(products.ID)
 
 	if images, err := models.GetImages(int(products.ID)); err != nil {
 		message := map[string]string{"message": "failed to get images"}

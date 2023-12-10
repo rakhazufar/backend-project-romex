@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+var DB *gorm.DB
 
 func ConnectDatabase() {
 	dbURL := "postgres://postgres:postgres@localhost:5432/go-product"
@@ -17,9 +17,9 @@ func ConnectDatabase() {
 		log.Fatalln(err)
 	}
 
-	db = d
+	DB = d
 }
 
 func GetDB() *gorm.DB {
-	return db
+	return DB
 }

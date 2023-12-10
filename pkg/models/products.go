@@ -16,14 +16,24 @@ type Products struct {
 	CategoryID  uint    `gorm:"varchar(300)" json:"category_id"`
 	Status      Status
 	Categories  Categories `gorm:"foreignKey:CategoryID"`
+	Variants    []Variant
+	Images      []Image
 }
 
-func CreateProduct(product *Products) error {
-	result := db.Create(&product)
-	if result.Error != nil {
-		return result.Error
+type ProductWithVariantsInput struct {
+	Product  Products  `json:"product"`
+	Variants []Variant `json:"variants"`
+}
+
+func CreateProduct(tx *gorm.DB, product *Products) (*Products, error) {
+	if tx == nil {
+		tx = db // fallback to global db instance jika tx tidak disediakan
 	}
-	return nil
+	result := tx.Create(product)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return product, nil
 }
 
 func GetAllProducts() ([]Products, error) {
@@ -39,7 +49,7 @@ func GetAllProducts() ([]Products, error) {
 
 func GetProductBySlug(slug string) (*Products, error) {
 	var products Products
-	result := db.Where("slug=?", slug).Preload("Status").Preload("Categories").Find(&products)
+	result := db.Where("slug=?", slug).Preload("Variants").Preload("Images").Preload("Status").Preload("Categories").Find(&products)
 
 	if result.Error != nil {
 		return nil, result.Error

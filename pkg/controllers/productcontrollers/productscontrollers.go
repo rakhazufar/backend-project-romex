@@ -2,35 +2,62 @@ package productcontrollers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rakhazufar/go-project/pkg/config"
 	"github.com/rakhazufar/go-project/pkg/models"
 	"github.com/rakhazufar/go-project/pkg/utils"
 )
 
+var db = config.GetDB()
+
 func CreateProducts(w http.ResponseWriter, r *http.Request) {
-	var addressInput models.Products
+	var input models.ProductWithVariantsInput
 
 	decoder := json.NewDecoder(r.Body)
 
-	if err := decoder.Decode(&addressInput); err != nil {
+	if err := decoder.Decode(&input); err != nil {
 		message := map[string]string{"message": "Failed to decode json"}
 		utils.SendJSONResponse(w, http.StatusBadRequest, message)
 		return
 	}
 
-	addressInput.Slug = utils.Slugify(addressInput.Title)
+	input.Product.Slug = utils.Slugify(input.Product.Title)
 
 	defer r.Body.Close()
 
-	if err := models.CreateProduct(&addressInput); err != nil {
-		message := map[string]string{"message": "Internal server error"}
-		utils.SendJSONResponse(w, http.StatusInternalServerError, message)
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	fmt.Print(input.Product)
+	product, err := models.CreateProduct(tx, &input.Product)
+
+	if err != nil {
+		tx.Rollback()
+		utils.SendJSONResponse(w, http.StatusInternalServerError, map[string]string{"message": "Internal server error"})
 		return
 	}
 
-	message := map[string]string{"message": "Success Add Product"}
+	for _, variantInput := range input.Variants {
+		variantInput.ProductsID = int(product.ID)
+		if err := models.CreateVariant(tx, &variantInput); err != nil {
+			tx.Rollback()
+			utils.SendJSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Could not create variant"})
+			return
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		utils.SendJSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Transaction commit failed"})
+		return
+	}
+
+	message := map[string]string{"message": "Product and variants created successfully"}
 	utils.SendJSONResponse(w, http.StatusOK, message)
 }
 

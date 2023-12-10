@@ -6,9 +6,9 @@ import (
 
 type Image struct {
 	gorm.Model
-	ImageURL  string   `gorm:"varchar(300)" json:"image_url"`
-	ProductID uint     `json:"product_id"`
-	Products  Products `json:"-" gorm:"foreignKey:ProductID"`
+	ImageURL   string   `gorm:"varchar(300)" json:"image_url"`
+	ProductsID uint     `json:"-"`
+	Products   Products `json:"-" gorm:"foreignKey:ProductsID"`
 }
 
 func ImageUpload(image *Image) error {
@@ -21,7 +21,7 @@ func ImageUpload(image *Image) error {
 
 func GetImages(id int) ([]Image, error) {
 	var image []Image
-	result := db.Where("product_id = ?", id).Find(&image)
+	result := db.Where("products_id = ?", id).Find(&image)
 
 	if result.Error != nil {
 		return nil, result.Error
