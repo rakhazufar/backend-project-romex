@@ -19,3 +19,12 @@ func CreateVariant(tx *gorm.DB, variant *Variant) error {
 	}
 	return nil
 }
+
+func DeleteVariantById(id int64) error {
+	var variant Variant
+	result := db.Where("id=?", id).Delete(&variant)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

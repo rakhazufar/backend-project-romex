@@ -6,7 +6,7 @@ import (
 	"github.com/rakhazufar/go-project/pkg/middlewares"
 )
 
-func Address (router *mux.Router) {
+func Address(router *mux.Router) {
 	api := router.PathPrefix("/api/v1").Subrouter()
 	api.HandleFunc("/address", addresscontrollers.CreateAddress).Methods("POST")
 	api.HandleFunc("/address", addresscontrollers.UpdateAddress).Methods("PUT")

@@ -66,3 +66,12 @@ func GetAdminByUsername(username string) (*Admin, error) {
 
 	return &admin, nil
 }
+
+func DeleteAdminById(id int64) error {
+	var admin Admin
+	result := db.Where("id=?", id).Delete(&admin)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

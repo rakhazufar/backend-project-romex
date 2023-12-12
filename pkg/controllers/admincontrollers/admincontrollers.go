@@ -3,10 +3,13 @@ package admincontrollers
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/gorilla/mux"
 	"github.com/rakhazufar/go-project/pkg/config"
 	"github.com/rakhazufar/go-project/pkg/models"
 	"github.com/rakhazufar/go-project/pkg/utils"
@@ -14,13 +17,12 @@ import (
 	"gorm.io/gorm"
 )
 
-
 func AdminLogin(w http.ResponseWriter, r *http.Request) {
 	var adminInput models.Admin
 	//membaca json dari r.body
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&adminInput); err != nil {
-		message := map[string]string{"message":  "Failed to decode json"}
+		message := map[string]string{"message": "Failed to decode json"}
 		utils.SendJSONResponse(w, http.StatusBadRequest, message)
 		return
 	}
@@ -33,12 +35,12 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			message := map[string]string{"message": "Server error"}
 			utils.SendJSONResponse(w, http.StatusInternalServerError, message)
-            return
+			return
 		}
 	} else if admin == nil {
 		message := map[string]string{"message": "Admin Not Found"}
 		utils.SendJSONResponse(w, http.StatusUnauthorized, message)
-		return 
+		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(adminInput.Password)); err != nil {
@@ -50,11 +52,11 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 	expTimeToken := time.Now().Add(time.Hour * 24 * 30)
 
 	claims := &config.AdminJWTClaim{
-		AdminId: int(admin.ID),
-		RoleID: int(admin.RoleID),
+		AdminId:  int(admin.ID),
+		RoleID:   int(admin.RoleID),
 		Username: admin.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer: "go-jwt-postgres",
+			Issuer:    "go-jwt-postgres",
 			ExpiresAt: jwt.NewNumericDate(expTimeToken),
 		},
 	}
@@ -66,13 +68,13 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		message := map[string]string{"message": "Server error"}
 		utils.SendJSONResponse(w, http.StatusInternalServerError, message)
-        return
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name: "token",
-		Path: "/",
-		Value: token,
+		Name:     "token",
+		Path:     "/",
+		Value:    token,
 		HttpOnly: true,
 	})
 	message := map[string]string{"message": "success"}
@@ -86,9 +88,9 @@ func AdminRegister(w http.ResponseWriter, r *http.Request) {
 	adminInput.RoleID = uint(adminInput.RoleID)
 	if err := decoder.Decode(&adminInput); err != nil {
 
-		message := map[string]string {"message": "Failed to decode json"}
+		message := map[string]string{"message": "Failed to decode json"}
 		utils.SendJSONResponse(w, http.StatusBadRequest, message)
-		return 
+		return
 	}
 
 	defer r.Body.Close()
@@ -102,37 +104,60 @@ func AdminRegister(w http.ResponseWriter, r *http.Request) {
 	} else if admin != nil {
 		message := map[string]string{"message": "Admin Already registered"}
 		utils.SendJSONResponse(w, http.StatusConflict, message)
-		return 
+		return
 	}
 
 	if hashedPassword, err := utils.HashAdminPassword(adminInput.Password); err != nil {
 		message := map[string]string{"message": "Internal Server Error"}
 		utils.SendJSONResponse(w, http.StatusInternalServerError, message)
-		return 
+		return
 	} else {
 		adminInput.Password = *hashedPassword
 	}
-	
 
 	if err := models.CreateAdmin(&adminInput); err != nil {
-		message := map[string]string {"message": "Failed to Create User"}
+		message := map[string]string{"message": "Failed to Create User"}
 		utils.SendJSONResponse(w, http.StatusInternalServerError, message)
-		return 
+		return
 	}
 
 	message := map[string]string{"message": "success"}
 	utils.SendJSONResponse(w, http.StatusOK, message)
 }
 
-
 func Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
-		Name: "token",
-		Path: "/",
-		Value: "",
+		Name:     "token",
+		Path:     "/",
+		Value:    "",
 		HttpOnly: true,
-		MaxAge: -1,
+		MaxAge:   -1,
 	})
 	message := map[string]string{"message": "Logout Success"}
+	utils.SendJSONResponse(w, http.StatusOK, message)
+}
+
+func DeleteAdmin(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	adminId := vars["id"]
+	id, err := strconv.ParseInt(adminId, 10, 64)
+	if err != nil {
+		log.Printf("Error converting string to int: %v", err)
+		message := map[string]string{"message": "Invalid ID format"}
+		utils.SendJSONResponse(w, http.StatusInternalServerError, message)
+		return
+	}
+	if err := models.DeleteAdminById(id); err != nil {
+		log.Printf("Error deleting image: %v", err)
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.SendJSONResponse(w, http.StatusNotFound, map[string]string{"message": "User not found"})
+		} else {
+			utils.SendJSONResponse(w, http.StatusInternalServerError, map[string]string{"message": "Internal server error"})
+		}
+		return
+	}
+
+	message := map[string]string{"message": "Success Delete Admin"}
 	utils.SendJSONResponse(w, http.StatusOK, message)
 }

@@ -12,15 +12,17 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-	  log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file")
 	}
-  
+
 	r := mux.NewRouter()
 	routes.Authentication(r)
 	routes.Address(r)
 	routes.Admin(r)
 	routes.Products(r)
 	routes.Image(r)
+	routes.Variant(r)
+	routes.Categories(r)
 
 	log.Fatal(http.ListenAndServe(":9010", r))
 }

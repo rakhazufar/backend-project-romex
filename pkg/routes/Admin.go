@@ -13,6 +13,7 @@ func Admin(router *mux.Router) {
 	router.HandleFunc("/admin/login", admincontrollers.AdminLogin).Methods("POST")
 	api.HandleFunc("/admin/create", admincontrollers.AdminRegister).Methods("POST")
 	adminApi.HandleFunc("/admin/logout", admincontrollers.Logout).Methods("GET")
+	api.HandleFunc("/admin/deleteAdmin/{id}", admincontrollers.DeleteAdmin).Methods("DELETE")
 
 	api.Use(middlewares.AdministratorJWTMiddleware)
 	adminApi.Use(middlewares.AdminJWTMiddleware)

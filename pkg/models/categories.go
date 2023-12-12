@@ -12,21 +12,20 @@ type Categories struct {
 }
 
 func SeedCategories(db *gorm.DB) {
-    categories := []Categories{
-        {Name: "parfum"},
-        {Name: "baju"},
-    }
+	categories := []Categories{
+		{Name: "parfum"},
+		{Name: "baju"},
+	}
 
-    for _, category := range categories {
-        var tempCategories Categories
-        if err := db.Where("name = ?", category.Name).First(&tempCategories).Error; err != nil {
-            if errors.Is(err, gorm.ErrRecordNotFound) {
-                db.Create(&category)
-            }
-        }
-    }
+	for _, category := range categories {
+		var tempCategories Categories
+		if err := db.Where("name = ?", category.Name).First(&tempCategories).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				db.Create(&category)
+			}
+		}
+	}
 }
-
 
 func GetCategoryByID(id int) (*Categories, error) {
 	var category Categories
@@ -48,4 +47,21 @@ func GetAllCategories() ([]Categories, error) {
 	}
 
 	return categories, nil
+}
+
+func CreateCategory(categories *Categories) error {
+	result := db.Create(&categories)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func DeleteCategoryById(id int64) error {
+	var categories Categories
+	result := db.Where("id=?", id).Delete(&categories)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
