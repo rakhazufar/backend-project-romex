@@ -11,7 +11,7 @@ func Categories(router *mux.Router) {
 	adminApi := router.PathPrefix("/api/v1").Subrouter()
 
 	adminApi.HandleFunc("/create-category", categoriescontrollers.CreateCategory).Methods("POST")
-	// adminApi.HandleFunc("/delete-category/{id}", categoriescontrollers.DeleteCategoriesById).Methods("DELETE")
+	adminApi.HandleFunc("/delete-category/{id}", categoriescontrollers.DeleteCategoriesById).Methods("DELETE")
 
 	adminApi.Use(middlewares.AdminJWTMiddleware)
 }

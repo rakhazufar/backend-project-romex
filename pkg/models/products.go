@@ -58,6 +58,17 @@ func GetProductBySlug(slug string) (*Products, error) {
 	return &products, nil
 }
 
+func GetProductCategoryById(id int64) (*Products, error) {
+	var products Products
+	result := db.Where("category_id=?", id).Find(&products)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &products, nil
+}
+
 func UpdateProduct(products *Products) (*Products, error) {
 	result := db.Save(products)
 

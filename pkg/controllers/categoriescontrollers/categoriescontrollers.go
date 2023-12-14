@@ -24,6 +24,18 @@ func DeleteCategoriesById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if result, err := models.GetProductCategoryById(id); err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			message := map[string]string{"message": "Server Error"}
+			utils.SendJSONResponse(w, http.StatusInternalServerError, message)
+			return
+		}
+	} else if result != nil {
+		message := map[string]string{"message": "there is products with this category"}
+		utils.SendJSONResponse(w, http.StatusConflict, message)
+		return
+	}
+
 	if err := models.DeleteCategoryById(id); err != nil {
 		log.Printf("Error deleting image: %v", err)
 
