@@ -11,7 +11,8 @@ func Variant(router *mux.Router) {
 	adminApi := router.PathPrefix("/api/v1").Subrouter()
 
 	adminApi.HandleFunc("/variant/{id}", variantcontrollers.DeleteVariantById).Methods("DELETE")
-	adminApi.HandleFunc("edit-variant/{productsId}/{variantId}", variantcontrollers.DeleteVariantById).Methods("PUT")
+	adminApi.HandleFunc("/variant/{id}", variantcontrollers.GetVariantByProductId).Methods("GET")
+	adminApi.HandleFunc("/variant", variantcontrollers.EditVariant).Methods("PUT")
 
 	adminApi.Use(middlewares.AdminJWTMiddleware)
 }

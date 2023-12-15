@@ -28,3 +28,34 @@ func DeleteVariantById(id int64) error {
 	}
 	return nil
 }
+
+func GetVariantByProductId(id int64) ([]Variant, error) {
+	var variant []Variant
+	result := db.Where("products_id=?", id).Find(&variant)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return variant, nil
+}
+
+func UpdateVariant(tx *gorm.DB, variant *Variant) error {
+	if tx == nil {
+		tx = db // fallback to global db instance jika tx tidak disediakan
+	}
+	result := tx.Save(variant)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func GetVariantById(id uint) (*Variant, error) {
+	var variant Variant
+	result := db.Where("id=?", id).Find(&variant)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &variant, nil
+}
