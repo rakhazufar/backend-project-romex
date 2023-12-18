@@ -5,17 +5,14 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	"github.com/rakhazufar/go-project/pkg/routes"
+	"github.com/rs/cors"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	r := mux.NewRouter()
+
 	routes.Authentication(r)
 	routes.Address(r)
 	routes.Admin(r)
@@ -23,6 +20,18 @@ func main() {
 	routes.Image(r)
 	routes.Variant(r)
 	routes.Categories(r)
+	routes.Token(r)
 
-	log.Fatal(http.ListenAndServe(":9010", r))
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           86400,
+	})
+
+	// Terapkan CORS ke router
+	handler := c.Handler(r)
+
+	log.Fatal(http.ListenAndServe(":9010", handler))
 }

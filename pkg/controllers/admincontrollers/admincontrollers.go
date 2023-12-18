@@ -5,11 +5,13 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/rakhazufar/go-project/pkg/config"
 	"github.com/rakhazufar/go-project/pkg/models"
 	"github.com/rakhazufar/go-project/pkg/utils"
@@ -18,6 +20,7 @@ import (
 )
 
 func AdminLogin(w http.ResponseWriter, r *http.Request) {
+
 	var adminInput models.Admin
 	//membaca json dari r.body
 	decoder := json.NewDecoder(r.Body)
@@ -28,6 +31,12 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer r.Body.Close()
+
+	var err = godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	var JWT_KEY = []byte(os.Getenv("JWT_KEY"))
 
 	admin, err := models.GetAdminByUsername(adminInput.Username)
 
@@ -63,7 +72,7 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 
 	tokenAlgo := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	token, err := tokenAlgo.SignedString(config.JWT_KEY)
+	token, err := tokenAlgo.SignedString(JWT_KEY)
 
 	if err != nil {
 		message := map[string]string{"message": "Server error"}
@@ -71,13 +80,7 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "token",
-		Path:     "/",
-		Value:    token,
-		HttpOnly: true,
-	})
-	message := map[string]string{"message": "success"}
+	message := map[string]string{"message": "success", "token": token}
 	utils.SendJSONResponse(w, http.StatusOK, message)
 }
 

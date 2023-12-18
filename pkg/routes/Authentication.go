@@ -6,7 +6,7 @@ import (
 	"github.com/rakhazufar/go-project/pkg/middlewares"
 )
 
-func Authentication (router *mux.Router) {
+func Authentication(router *mux.Router) {
 	api := router.PathPrefix("/api/v1").Subrouter()
 	router.HandleFunc("/login/", authcontrollers.Login).Methods("POST")
 	router.HandleFunc("/register/", authcontrollers.Register).Methods("POST")

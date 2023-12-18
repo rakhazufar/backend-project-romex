@@ -3,9 +3,12 @@ package middlewares
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/joho/godotenv"
 	"github.com/rakhazufar/go-project/pkg/config"
 	"github.com/rakhazufar/go-project/pkg/utils"
 )
@@ -15,44 +18,49 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		c, err := r.Cookie("token")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				response:= map[string]string{"message": "Unauthorized"}
+				response := map[string]string{"message": "Unauthorized"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
 			}
 		}
+
+		if err := godotenv.Load(); err != nil {
+			log.Fatal("Error loading .env file")
+		}
+		var JWT_KEY = []byte(os.Getenv("JWT_KEY"))
 
 		tokenString := c.Value
 
 		claims := &config.JWTClaim{}
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-			return config.JWT_KEY, nil
+			return JWT_KEY, nil
 		})
 
 		if err != nil {
-			v,_ := err.(*jwt.ValidationError)
+			v, _ := err.(*jwt.ValidationError)
 			switch v.Errors {
 			case jwt.ValidationErrorSignatureInvalid:
-				response:= map[string]string{"message": "Unauthorized"}
+				response := map[string]string{"message": "Unauthorized"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
 			case jwt.ValidationErrorExpired:
-				response:= map[string]string{"message": "Unauthorized, Token Expired!"}
+				response := map[string]string{"message": "Unauthorized, Token Expired!"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
 			default:
-				response:= map[string]string{"message": "Unauthorized"}
+				response := map[string]string{"message": "Unauthorized"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
-			}	  
+			}
 		}
 
 		if !token.Valid {
-			response:= map[string]string{"message": "Unauthorized"}
+			response := map[string]string{"message": "Unauthorized"}
 			utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 			return
 		}
-		
+
 		ctx := context.WithValue(r.Context(), "username", claims.Username)
 		ctx = context.WithValue(ctx, "userId", claims.UserId)
 		r = r.WithContext(ctx)
@@ -66,44 +74,48 @@ func AdminJWTMiddleware(next http.Handler) http.Handler {
 		c, err := r.Cookie("token")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				response:= map[string]string{"message": "Unauthorized"}
+				response := map[string]string{"message": "Unauthorized"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
 			}
 		}
+		if err := godotenv.Load(); err != nil {
+			log.Fatal("Error loading .env file")
+		}
+		var JWT_KEY = []byte(os.Getenv("JWT_KEY"))
 
 		tokenString := c.Value
 
 		claims := &config.AdminJWTClaim{}
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-			return config.JWT_KEY, nil
+			return JWT_KEY, nil
 		})
 
 		if err != nil {
-			v,_ := err.(*jwt.ValidationError)
+			v, _ := err.(*jwt.ValidationError)
 			switch v.Errors {
 			case jwt.ValidationErrorSignatureInvalid:
-				response:= map[string]string{"message": "Unauthorized"}
+				response := map[string]string{"message": "Unauthorized"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
 			case jwt.ValidationErrorExpired:
-				response:= map[string]string{"message": "Unauthorized, Token Expired!"}
+				response := map[string]string{"message": "Unauthorized, Token Expired!"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
 			default:
-				response:= map[string]string{"message": "Unauthorized"}
+				response := map[string]string{"message": "Unauthorized"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
-			}	  
+			}
 		}
 
 		if !token.Valid {
-			response:= map[string]string{"message": "Unauthorized"}
+			response := map[string]string{"message": "Unauthorized"}
 			utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 			return
 		}
-		
+
 		ctx := context.WithValue(r.Context(), "username", claims.Username)
 		ctx = context.WithValue(ctx, "adminId", claims.AdminId)
 		r = r.WithContext(ctx)
@@ -117,46 +129,51 @@ func AdministratorJWTMiddleware(next http.Handler) http.Handler {
 		c, err := r.Cookie("token")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				response:= map[string]string{"message": "Unauthorized"}
+				response := map[string]string{"message": "Unauthorized"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
 			}
 		}
+
+		if err := godotenv.Load(); err != nil {
+			log.Fatal("Error loading .env file")
+		}
+		var JWT_KEY = []byte(os.Getenv("JWT_KEY"))
 
 		tokenString := c.Value
 
 		claims := &config.AdminJWTClaim{}
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-			return config.JWT_KEY, nil
+			return JWT_KEY, nil
 		})
 
 		if err != nil {
-			v,_ := err.(*jwt.ValidationError)
+			v, _ := err.(*jwt.ValidationError)
 			switch v.Errors {
 			case jwt.ValidationErrorSignatureInvalid:
-				response:= map[string]string{"message": "Unauthorized"}
+				response := map[string]string{"message": "Unauthorized"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
 			case jwt.ValidationErrorExpired:
-				response:= map[string]string{"message": "Unauthorized, Token Expired!"}
+				response := map[string]string{"message": "Unauthorized, Token Expired!"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
 			default:
-				response:= map[string]string{"message": "Unauthorized"}
+				response := map[string]string{"message": "Unauthorized"}
 				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 				return
-			}	  
+			}
 		}
 
 		if !token.Valid {
-			response:= map[string]string{"message": "Unauthorized"}
+			response := map[string]string{"message": "Unauthorized"}
 			utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 			return
 		}
 		fmt.Println(claims.RoleID)
 		if claims.RoleID != 1 {
-			response:= map[string]string{"message": "Unauthentication"}
+			response := map[string]string{"message": "Unauthentication"}
 			utils.SendJSONResponse(w, http.StatusUnauthorized, response)
 			return
 		}

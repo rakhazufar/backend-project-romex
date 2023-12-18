@@ -9,7 +9,7 @@ import (
 func init() {
 	config.ConnectDatabase()
 	db = config.GetDB()
-	err := db.AutoMigrate(&User{}, &Admin{}, &Address{}, &Products{}, &Role{}, &Status{}, &Categories{}, &Image{}, &Variant{})
+	err := db.AutoMigrate(&User{}, &Admin{}, &Address{}, &Products{}, &Role{}, &Status{}, &Categories{}, &Image{}, &Variant{}, &Transaction{}, &GuestUser{})
 	SeedRoles(db)
 	SeedAdmin(db)
 	SeedStatus(db)
