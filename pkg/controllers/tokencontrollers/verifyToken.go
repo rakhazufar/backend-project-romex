@@ -1,11 +1,11 @@
 package tokencontrollers
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
@@ -17,8 +17,6 @@ type Token struct {
 }
 
 func VerifyToken(w http.ResponseWriter, r *http.Request) {
-	var tokenInput Token
-
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -26,19 +24,16 @@ func VerifyToken(w http.ResponseWriter, r *http.Request) {
 
 	secretKey := JWT_KEY
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&tokenInput); err != nil {
-		message := map[string]string{"message": "Failed to decode json"}
-		utils.SendJSONResponse(w, http.StatusBadRequest, message)
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		utils.SendJSONResponse(w, http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
 		return
 	}
-
-	fmt.Println("Secret key: ", string(secretKey))
-	fmt.Println("Received token: ", tokenInput.Token)
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 	defer r.Body.Close()
 
-	token, err := jwt.Parse(tokenInput.Token, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Validasi algoritma token
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -59,7 +54,6 @@ func VerifyToken(w http.ResponseWriter, r *http.Request) {
 		}
 
 		adminIdStr, ok := adminId.(string)
-		fmt.Println(adminIdStr)
 		if !ok {
 			utils.SendJSONResponse(w, http.StatusInternalServerError, map[string]string{"message": "Error converting Username to string"})
 			return

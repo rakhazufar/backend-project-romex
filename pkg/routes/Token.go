@@ -6,6 +6,6 @@ import (
 )
 
 func Token(router *mux.Router) {
-	router.HandleFunc("/verify-token", tokencontrollers.VerifyToken).Methods("POST")
+	router.HandleFunc("/verify-token", tokencontrollers.VerifyToken).Methods("GET")
 
 }
