@@ -73,3 +73,16 @@ func CreateCategory(w http.ResponseWriter, r *http.Request) {
 	message := map[string]string{"message": "Success Creating Category"}
 	utils.SendJSONResponse(w, http.StatusOK, message)
 }
+
+func GetCategories(w http.ResponseWriter, r *http.Request) {
+	categories, err := models.GetAllCategories()
+
+	if err != nil {
+		message := map[string]string{"message": "Internal Server Error"}
+		utils.SendJSONResponse(w, http.StatusInternalServerError, message)
+		return
+	}
+
+	message := map[string]interface{}{"status": "oke", "data": categories}
+	utils.SendJSONResponse(w, http.StatusOK, message)
+}

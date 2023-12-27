@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
@@ -71,20 +72,17 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 func AdminJWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c, err := r.Cookie("token")
-		if err != nil {
-			if err == http.ErrNoCookie {
-				response := map[string]string{"message": "Unauthorized"}
-				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
-				return
-			}
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			utils.SendJSONResponse(w, http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
+			return
 		}
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
 		if err := godotenv.Load(); err != nil {
 			log.Fatal("Error loading .env file")
 		}
 		var JWT_KEY = []byte(os.Getenv("JWT_KEY"))
-
-		tokenString := c.Value
 
 		claims := &config.AdminJWTClaim{}
 
@@ -126,21 +124,17 @@ func AdminJWTMiddleware(next http.Handler) http.Handler {
 
 func AdministratorJWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c, err := r.Cookie("token")
-		if err != nil {
-			if err == http.ErrNoCookie {
-				response := map[string]string{"message": "Unauthorized"}
-				utils.SendJSONResponse(w, http.StatusUnauthorized, response)
-				return
-			}
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			utils.SendJSONResponse(w, http.StatusUnauthorized, map[string]string{"message": "Unauthorized"})
+			return
 		}
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		if err := godotenv.Load(); err != nil {
 			log.Fatal("Error loading .env file")
 		}
 		var JWT_KEY = []byte(os.Getenv("JWT_KEY"))
-
-		tokenString := c.Value
 
 		claims := &config.AdminJWTClaim{}
 

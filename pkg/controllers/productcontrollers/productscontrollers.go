@@ -2,7 +2,6 @@ package productcontrollers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -19,12 +18,18 @@ func CreateProducts(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&input); err != nil {
-		message := map[string]string{"message": "Failed to decode json"}
+		message := map[string]string{"message": err.Error()}
 		utils.SendJSONResponse(w, http.StatusBadRequest, message)
 		return
 	}
 
 	input.Product.Slug = utils.Slugify(input.Product.Title)
+
+	if input.Product.Title == "" || input.Product.Price == 0 || input.Product.StatusID == 0 || input.Product.Description == "" || input.Product.CategoryID == 0 {
+		message := map[string]string{"message": "Cannot Make Product with Empty field", "status": "error"}
+		utils.SendJSONResponse(w, http.StatusConflict, message)
+		return
+	}
 
 	defer r.Body.Close()
 
@@ -34,7 +39,7 @@ func CreateProducts(w http.ResponseWriter, r *http.Request) {
 			tx.Rollback()
 		}
 	}()
-	fmt.Print(input.Product)
+
 	product, err := models.CreateProduct(tx, &input.Product)
 
 	if err != nil {
@@ -57,7 +62,7 @@ func CreateProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message := map[string]string{"message": "Product and variants created successfully"}
+	message := map[string]string{"message": "Product and variants created successfully", "status": "success"}
 	utils.SendJSONResponse(w, http.StatusOK, message)
 }
 

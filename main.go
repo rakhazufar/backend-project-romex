@@ -21,6 +21,7 @@ func main() {
 	routes.Variant(r)
 	routes.Categories(r)
 	routes.Token(r)
+	routes.Status(r)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
