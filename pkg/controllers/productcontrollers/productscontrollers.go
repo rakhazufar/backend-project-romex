@@ -3,6 +3,7 @@ package productcontrollers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/rakhazufar/go-project/pkg/config"
@@ -62,7 +63,7 @@ func CreateProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	message := map[string]string{"message": "Product and variants created successfully", "status": "success"}
+	message := map[string]string{"message": "Product and variants created successfully", "status": "success", "products": strconv.FormatUint(uint64(product.ID), 10)}
 	utils.SendJSONResponse(w, http.StatusOK, message)
 }
 

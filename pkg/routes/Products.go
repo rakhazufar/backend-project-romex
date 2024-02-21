@@ -6,7 +6,7 @@ import (
 	"github.com/rakhazufar/go-project/pkg/middlewares"
 )
 
-func Products (router *mux.Router) {
+func Products(router *mux.Router) {
 	api := router.PathPrefix("/api/v1").Subrouter()
 	api.HandleFunc("/products", productcontrollers.CreateProducts).Methods("POST")
 	api.HandleFunc("/products", productcontrollers.GetAllProducts).Methods("GET")
@@ -15,5 +15,3 @@ func Products (router *mux.Router) {
 	api.HandleFunc("/products/{slug}", productcontrollers.DeleteProductsBySlug).Methods("DELETE")
 	api.Use(middlewares.AdminJWTMiddleware)
 }
-
-
